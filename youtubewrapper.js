@@ -1,5 +1,10 @@
 define(function() {
 
+  /*
+
+  */
+
+
   function getVideoTitle(id, callback) {
     var url = 'http://gdata.youtube.com/feeds/api/videos/' + id + '?alt=json';
     callApi(url, callback, function(jsonData) {
@@ -7,6 +12,8 @@ define(function() {
     });
   }
 
+
+// http://gdata.youtube.com/feeds/api/videos/-/blue?v=2&max-results=2&alt=json
   /**
   http://gdata.youtube.com/feeds/api/videos?
     alt=json
@@ -15,8 +22,42 @@ define(function() {
     &max-results=10
     &v=2
   */
-  function searchVideo(keyword, callback) {
+  function searchVideo(keyword, callback, startIndex) {
+    var url = 'http://gdata.youtube.com/feeds/api/videos/-/' + keyword
+      + '?v=2' 
+      + '&alt=json' 
+      + '&max-results=10'
+    callApi(url, callback, function(jsonData) {
+      var entry = jsonData.feed.entry;
 
+      // てきとう。entryのフィールドをしらべて、json objectをつくる
+      for (var i=0; i<entry.length; i++) {
+        
+        // contentUrl = entry[i].content.src;
+        
+        // コンテンツのURL
+        for (var j=0; j<entry[i].media$group.media$content.length; j++) {
+          var content = entry[i].media$group.media$content[j];
+          if (content.isDefault) {
+            var contentUrl = content.url;
+          }
+        }
+
+        // サムネイル
+        for (var j=0; j<entry[i].media$group.media$thumbnail.length; j++) {
+          var content = entry[i].media$group.media$thumbnail[j];
+          if (content.yt$name === 'default') {
+            var thumbnail = content.url;
+          }
+        }        
+
+        // Title
+        var title = entry[i].media$group.media$title.$t;
+
+      }
+
+      return null;
+    });
 
   }
 
@@ -33,7 +74,8 @@ define(function() {
   }
 
   return {
-    getVideoTitle: getVideoTitle
+    getVideoTitle: getVideoTitle,
+    searchVideo: searchVideo
   };
 
 });

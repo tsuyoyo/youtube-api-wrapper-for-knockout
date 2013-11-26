@@ -30,35 +30,42 @@ define(function() {
     callApi(url, callback, function(jsonData) {
       var entry = jsonData.feed.entry;
 
-      // てきとう。entryのフィールドをしらべて、json objectをつくる
+      var videos = [];
+
       for (var i=0; i<entry.length; i++) {
-        
-        // contentUrl = entry[i].content.src;
-        
-        // コンテンツのURL
-        for (var j=0; j<entry[i].media$group.media$content.length; j++) {
-          var content = entry[i].media$group.media$content[j];
-          if (content.isDefault) {
-            var contentUrl = content.url;
-          }
-        }
 
-        // サムネイル
-        for (var j=0; j<entry[i].media$group.media$thumbnail.length; j++) {
-          var content = entry[i].media$group.media$thumbnail[j];
-          if (content.yt$name === 'default') {
-            var thumbnail = content.url;
-          }
-        }        
-
-        // Title
-        var title = entry[i].media$group.media$title.$t;
-
+        videos.push({contentUrl: contentUrl, thumbnail: thumbnail, title: title});
       }
 
-      return null;
+      return videos;
     });
 
+  }
+
+  function parseEntry(entry) {
+    var contentUrl;
+    var thumbnail;
+    var title;
+
+    // Content URL
+    entry.media$group.media$content.forEach(function(value) {
+      if (value.isDefault) {
+        contentUrl = value.url;
+      }
+    });
+
+    // サムネイル
+    entry.media$group.media$thumbnail.forEach(function(value) {
+      var content = value;
+      if (content.yt$name === 'default') {
+        thumbnail = content.url;
+      }
+    });
+  
+    // Title
+    title = entry.media$group.media$title.$t;
+
+    return new ??
   }
 
   function callApi(apiUrl, callback, resultGenerator) {
@@ -72,6 +79,7 @@ define(function() {
       }
     xhr.send();
   }
+
 
   return {
     getVideoTitle: getVideoTitle,

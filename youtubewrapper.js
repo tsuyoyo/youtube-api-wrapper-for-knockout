@@ -27,19 +27,16 @@ define(function() {
       + '?v=2' 
       + '&alt=json' 
       + '&max-results=10'
-    callApi(url, callback, function(jsonData) {
-      var entry = jsonData.feed.entry;
+    callApi(url, callback, parseJson);
+  }
 
-      var videos = [];
-
-      for (var i=0; i<entry.length; i++) {
-
-        videos.push({contentUrl: contentUrl, thumbnail: thumbnail, title: title});
-      }
-
-      return videos;
-    });
-
+  function parseJson(jsonData) {
+    var entry = jsonData.feed.entry;
+    var videos = [];
+    for (var i=0; i<entry.length; i++) {
+      videos.push(parseEntry(entry[i]));
+    }
+    return videos;    
   }
 
   function parseEntry(entry) {
@@ -65,21 +62,20 @@ define(function() {
     // Title
     title = entry.media$group.media$title.$t;
 
-    return new ??
+    return {contentUrl: contentUrl, thumbnail: thumbnail, title: title};
   }
 
-  function callApi(apiUrl, callback, resultGenerator) {
+  function callApi(apiUrl, callback, jsonParser) {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', apiUrl, true);
       xhr.onreadystatechange = function(){
         if (xhr.readyState === 4 && xhr.status === 200){
           var jsonData = JSON.parse(xhr.responseText);
-          callback(resultGenerator(jsonData));
+          callback(jsonParser(jsonData));
         }
       }
     xhr.send();
   }
-
 
   return {
     getVideoTitle: getVideoTitle,
